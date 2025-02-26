@@ -4,8 +4,8 @@ pygame.init()
 
 M = Methods()
 
-WINRES = (1280, int(1280 / M.get_current_monitor_ratio()))  # Set window and rendering resolutions
-RENRES = 640, int(640 / M.get_current_monitor_ratio())
+WINRES = 1280, 720
+RENRES = 640, 360
 GAMESIZE = 4000, 4000
 
 DISPLAY = pygame.display.set_mode(WINRES, pygame.OPENGL | pygame.DOUBLEBUF)  # Set up the display

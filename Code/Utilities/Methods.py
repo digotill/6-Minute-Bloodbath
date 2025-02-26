@@ -1,4 +1,4 @@
-import functools, math, os, random, pygame, win32api
+import functools, math, os, random, pygame
 
 class Methods:
           def __init__(self):
@@ -216,15 +216,3 @@ class Methods:
           def set_rect(object1):
                     # Set the rect attribute of an object based on its position and resolution
                     object1.rect = pygame.Rect(object1.pos.x - object1.res[0] / 2, object1.pos.y - object1.res[1] / 2, object1.res[0], object1.res[1])
-
-          @staticmethod
-          def get_current_monitor_ratio():
-                    mouse_pos = win32api.GetCursorPos()
-                    monitors = win32api.EnumDisplayMonitors()
-                    for monitor in monitors:
-                              monitor_info = win32api.GetMonitorInfo(monitor[0])
-                              monitor_area = monitor_info['Monitor']
-                              if (monitor_area[0] <= mouse_pos[0] < monitor_area[2] and
-                                      monitor_area[1] <= mouse_pos[1] < monitor_area[3]):
-                                        return (monitor_area[2] - monitor_area[0]) / (monitor_area[3] - monitor_area[1])
-                    return pygame.display.Info().current_w / pygame.display.Info().current_h
