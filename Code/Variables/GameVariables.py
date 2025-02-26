@@ -43,7 +43,7 @@ class GameVariables:
                     # Update game state variables each frame
                     self.game.displayinfo = pygame.display.Info()
                     self.game.inputM.update()  # Update input manager
-                    if self.game.clock.get_fps() != 0: self.game.dt = min(1 / self.game.clock.get_fps(), 1/20)  # Calculate delta time
+                    if self.game.clock.get_fps() != 0: self.game.dt = min(1 / self.game.clock.get_fps(), 1/60)  # Calculate delta time
                     else: self.game.dt = 0
                     if not self.game.changing_settings and not self.game.in_menu and not self.game.cards_on: self.game.game_time += self.game.dt  # Update game time
                     self.game.ticks = pygame.time.get_ticks() / 1000  # Get current time in seconds
@@ -51,5 +51,4 @@ class GameVariables:
                     if self.game.player is not None and self.game.player.health <= 0 and not self.game.won and not self.game.cards_on: self.game.died = True  # Check for player death
                     if self.game.changing_settings or self.game.in_menu or self.game.died or self.game.won: self.update_font_sizes()  # Update font sizes
                     self.game.fullscreen = pygame.display.is_fullscreen()  # Flag for fullscreen mode
-                    if getattr(self.game, "enemyM", None) is not None and len(self.game.enemyM.grid.items) == 0 and not self.game.player.dead and self.game.game_time > 480:
-                              self.game.won = True
+                    if getattr(self.game, "enemyM", None) is not None and len(self.game.enemyM.grid.items) == 0 and not self.game.player.dead and self.game.game_time > 380:self.game.won = True

@@ -60,6 +60,7 @@ class Player:
                     if self.game.inputM.get("move_right"): input_force.x += 1
                     if self.game.inputM.get("move_up"): input_force.y -= 1
                     if self.game.inputM.get("move_down"): input_force.y += 1
+
                     if self.game.inputM.get("jump"):self.jump()
 
                     if input_force.length() > 0:

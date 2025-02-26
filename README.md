@@ -47,6 +47,7 @@ Simply run the provided "run.exe" file to start the game.
 - Mouse: Aim
 - Left Click: Shoot
 - Shift: Sprint
+- Jump: Space
 - ESC: Pause game
 
 ### Packaging the Game

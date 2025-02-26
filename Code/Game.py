@@ -89,7 +89,7 @@ class Game:
                     self.soundM.play_music(self.assets["menu_music"])
                     # Main game loop
                     while self.running:
-                              self.clock.tick_busy_loop(10000)
+                              self.clock.tick_busy_loop(240)
                               self.check_if_load_game()
                               self.gameV.update()
                               self.eventM.handle_events()
