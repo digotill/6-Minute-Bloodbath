@@ -86,3 +86,6 @@ error_log.txt
 
 # Ignore .ap files in any directory
 **/*.ap
+
+#Files
+DataSave

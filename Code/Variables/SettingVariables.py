@@ -95,8 +95,8 @@ BUTTONS = {  # Button settings for various game states
                     "reset": M.create_button("reset", v2(190, 270), AM.assets["button12"], {"axis": "x", "axisl": "min"}),
                     "resume": M.create_button("resume", v2(190, 315), AM.assets["button12"], {"axis": "x", "axisl": "min"}), },
           "Weapon_Buttons": {
-                    "ak47": M.create_button("ak47 (2 win)", v2(540, 140), AM.assets["ak47"], {"text_pos": "top", "active": True, "axisl": "max", "axis": "x", "res": AM.assets["ak47"].size, "requirement": 2}),
-                    "spas12": M.create_button("spas12 (0 wins)", v2(540, 60), AM.assets["spas12"], {"text_pos": "top", "on": True, "active": True, "axisl": "max", "axis": "x", "res": AM.assets["spas12"].size, "requirement": 0}),
+                    "ak47": M.create_button("ak47 (2 wins)", v2(540, 140), AM.assets["ak47"], {"text_pos": "top", "active": True, "axisl": "max", "axis": "x", "res": AM.assets["ak47"].size, "requirement": 2}),
+                    "spas12": M.create_button("spas12 (0 win)", v2(540, 60), AM.assets["spas12"], {"text_pos": "top", "on": True, "active": True, "axisl": "max", "axis": "x", "res": AM.assets["spas12"].size, "requirement": 0}),
                     "m16a4": M.create_button("m16a4 (4 wins)", v2(540, 220), AM.assets["m16a4"], {"text_pos": "top", "active": True, "axisl": "max", "axis": "x", "res": AM.assets["m16a4"].size, "requirement": 4}),
                     "m60e4": M.create_button("m60e4 (6 wins)", v2(540, 300), AM.assets["m60e4"], {"text_pos": "top", "active": True, "axisl": "max", "axis": "x", "res": AM.assets["m60e4"].size, "requirement": 6}), },
           "Menu_Buttons": {

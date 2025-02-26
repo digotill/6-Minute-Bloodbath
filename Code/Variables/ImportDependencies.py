@@ -23,8 +23,7 @@ from pygame.math import Vector2 as v2  # Vector2 class for 2D vector operations
 from copy import deepcopy  # For creating deep copies of objects
 from itertools import product  # For creating cartesian products of iterables
 from pstats import Stats  # For profiling statistics
-#from memory_profiler import profile  # For memory profiling
-from line_profiler import profile    # For profiling Python code use kernprof -l -v run.py
+
 
 # Local imports
 from Code.Shaders import Shader  # Custom shader module

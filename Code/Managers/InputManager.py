@@ -46,6 +46,7 @@ class InputManager:
                     self.mouse["position"] = v2(int(self.mouse["real_position"].x * self.game.render_resolution[0] / self.game.display.width),
                                                     int(self.mouse["real_position"].y * self.game.render_resolution[1] / self.game.display.height))
                     if self.mouse["real_position"] != mouse_pos: pygame.mouse.set_pos(self.mouse["real_position"])  # Update mouse position if changed
+
                     if self.game.auto_shoot and not self.game.changing_settings and not self.game.in_menu and not self.game.died:
                               self.mouse["left_click"] = True
 
