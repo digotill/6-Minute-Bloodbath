@@ -136,8 +136,8 @@ class InteractablesManager:
 
                     for bar in list(self.bars.values()):
                               bar.update()
-                    self.bars["XP_bar"].text_input = "level: " + str(self.game.player.level)
-                    self.bars["Health_bar"].text_input = "health: " + str(self.game.player.health)
+                    self.bars["XP_bar"].text_input = "level: " + str(int(self.game.player.level))
+                    self.bars["Health_bar"].text_input = "health: " + str(int(self.game.player.health))
                     self.bars["Stamina_bar"].text_input = "stamina: " + str(int(self.game.player.stamina))
 
                     if self.game.inputM.get("left_click") and self.button_cooldown_timer.check(self.game.ticks) and not self.grabbing_slider and self.game.changing_settings:

@@ -42,7 +42,7 @@ VOLUMES = {  # Volume settings
           "jump_frequancy": 0.1, "jump_volume": 1}
 
 DIFFICULTY = {  # Difficulty settings    enemy speed, enemy health, enemy damage
-          "easy": (0.9, 0.6, 0.5), "medium": (1, 1, 1), "hard": (1.1, 1.6, 1.7), "win_change": (1, 1.1, 1.1)}
+          "easy": (0.9, 0.4, 0.4), "medium": (1, 1, 1), "hard": (1.1, 1.2, 1.2), "win_change": (1, 1.1, 1.1)}
 
 EXPERIENCE = {  # Experience settings
           "starting_max_xp": 100, "xp_progression_rate": 1.2, "blue": 8, "orange": 15, "green": 24, "purple": 48, "light_blue": 64, "red": 86, "animation_speed": 10, "attributes": {"speed": 200, "attraction_distance": 50, "collection_distance": 10}, "gradual_increase": 600}
@@ -59,7 +59,7 @@ GRASS = {  # Grass settings
           "positions": {"forest_grass": [0, 1, 2, 3, 4], "snow_grass": [5, 6, 7, 8, 9], "spring_grass": [10, 11, 12, 13, 14], "cherryblossom_grass": [15, 16, 17, 18, 19], "wasteland_grass": [20, 21, 22, 23, 24]}}
 
 PLAYER = {  # Player settings
-          'health': 20000, "res": (16, 16), 'vel': 80, "sprint_vel": 1.6, "slowed_vel": 0.5, 'damage': 30, 'acceleration': 200, "offset": 10, "hit_effect": (20, 200),
+          'health': 500, "res": (16, 16), 'vel': 80, "sprint_vel": 1.6, "slowed_vel": 0.5, 'damage': 30, 'acceleration': 200, "offset": 10, "hit_effect": (20, 200),
           'animation_speed': 10, "hit_cooldown": 0.4, 'stamina': 100, "stamina_consumption": 30, "stamina_recharge_rate": 10, "grass_force": 10, "slow_cooldown": 0.1,
           "friction": 0.9, "acceleration_rate": 2000, "jumping_velocity": -300, "gravity": 1000, "jump_stamina": 40, "jump_cooldown": 0.25, "jump_vel": 2}
 
@@ -129,16 +129,16 @@ ENEMIES = {  # Enemy settings           name,       res,      health, vel, damag
           "canine_black": M.create_enemy("canine_black", (48, 32), 400, 150, 30, 50, 2, {"blue": 0.95, "orange": 1}, True, 48),
           "werewolf": M.create_enemy("werewolf", (184, 64), 8000, 185, 60, 100, 5, {"green": 1}, True, 100, {"knockback": 1.2}),
           "pebble": M.create_enemy("pebble", (32, 32), 100, 150, 5, 50, 2, {"orange": 0.95, "green": 1}, False, 0, {"spawn_blood": False}),
-          "golem": M.create_enemy("golem", (32, 32), 600, 160, 50, 50, 2, {"orange": 0.95, "green": 1}, True, 24, {"spawn_blood": False}),
-          "armoured_golem": M.create_enemy("armoured_golem", (32, 32), 700, 160, 60, 50, 5, {"orange": 0.95, "green": 1}, True, 24, {"spawn_blood": False}),
+          "golem": M.create_enemy("golem", (32, 32), 500, 160, 50, 50, 2, {"orange": 0.95, "green": 1}, True, 24, {"spawn_blood": False}),
+          "armoured_golem": M.create_enemy("armoured_golem", (32, 32), 600, 160, 60, 50, 5, {"orange": 0.95, "green": 1}, True, 24, {"spawn_blood": False}),
           "titan": M.create_enemy("titan", (130, 100), 16000, 200, 80, 50, 10, {"purple": 1}, False, {"knockback": 1.2, "spawn_blood": False}),
-          "mini_peka": M.create_enemy("mini_peka", (32, 32), 800, 160, 70, 50, 1, {"green": 0.95, "purple": 1}, True, 32),
-          "bat": M.create_enemy("bat", (64, 64), 900, 160, 80, 50, 1, {"green": 0.95, "purple": 1}, True, 32),
-          "skinny": M.create_enemy("skinny", (64, 64), 1000, 160, 90, 50, 1, {"green": 0.95, "purple": 1}, True, 36),
+          "mini_peka": M.create_enemy("mini_peka", (32, 32), 650, 160, 70, 50, 1, {"green": 0.95, "purple": 1}, True, 32),
+          "bat": M.create_enemy("bat", (64, 64), 500, 160, 80, 50, 1, {"green": 0.95, "purple": 1}, True, 32),
+          "skinny": M.create_enemy("skinny", (64, 64), 400, 170, 90, 50, 1, {"green": 0.95, "purple": 1}, True, 36),
           "brain": M.create_enemy("brain", (80, 64), 30000, 200, 100, 50, 2, {"light_blue": 1}, True, 48, {"knockback": 1.2})}
 
 CARDS = {  # Card settings
-          6: ["damage", 6], 13: ["health", 6], 20: ["pierce", 1], 25: ["attack_speed", 0.004], 29: ["stamina", 8], 33: ["shots", 1.2], 41: ["knockback", 4],  # common
-          45: ["damage", 10], 55: ["health", 10], 59: ["pierce", 1.5], 67: ["attack_speed", 0.008], 74: ["spread", 1], 83: ["stamina", 10], 90: ["knockback", 6],  # rare
-          97: ["damage", 13], 106: ["health", 13], 111: ["pierce", 2], 120: ["attack_speed", 0.009], 127: ["spread", 2], 134: ["stamina", 13], 140: ["knockback", 7],  # epic
-          144: ["damage", 20], 148: ["health", 20], 152: ["pierce", 3], 156: ["attack_speed", 0.01], 160: ["spread", 3], 163: ["stamina", 20], 165: ["knockback", 8]}  # legendary
+          6: ["damage", 6], 13: ["health", 10], 20: ["pierce", 1], 25: ["attack_speed", 0.004], 29: ["spread", 1], 33: ["stamina", 6], 41: ["knockback", 4],  # common
+          45: ["damage", 10], 55: ["health", 20], 59: ["pierce", 2], 67: ["attack_speed", 0.008], 74: ["spread", 2], 83: ["stamina", 10], 90: ["knockback", 6],  # rare
+          97: ["damage", 13], 106: ["health", 30], 111: ["pierce", 3], 120: ["attack_speed", 0.01], 127: ["spread", 2], 134: ["stamina", 13], 140: ["knockback", 7],  # epic
+          144: ["damage", 20], 148: ["health", 50], 152: ["pierce", 4], 156: ["attack_speed", 0.015], 160: ["spread", 3], 163: ["stamina", 20], 165: ["knockback", 10]}  # legendary
