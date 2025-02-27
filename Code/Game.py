@@ -1,3 +1,5 @@
+import time
+
 from Code.Variables.SettingVariables import *
 from Code.Managers import *
 from Code.Shaders import *
@@ -41,6 +43,7 @@ class Game:
                     self.run_game()
 
           def load_game(self):
+                    start_load_time = time.time()
                     self.uiM.draw_loading()
                     self.shader.render_direct(pygame.Rect(0, 0, self.display.width, self.display.height))
                     pygame.display.flip()
@@ -54,6 +57,7 @@ class Game:
                               setattr(self, manager_name, manager_class(self))
                     self.soundM.fade_music(1000, self.assets["game_music"])
                     pygame.mouse.set_visible(False)
+                    print(time.time() - start_load_time)
 
           def check_if_load_game(self):
                     if not self.loaded_game and not self.in_menu:
@@ -89,7 +93,7 @@ class Game:
                     self.soundM.play_music(self.assets["menu_music"])
                     # Main game loop
                     while self.running:
-                              self.clock.tick_busy_loop(240)
+                              self.clock.tick_busy_loop(1000000)
                               self.check_if_load_game()
                               self.gameV.update()
                               self.eventM.handle_events()

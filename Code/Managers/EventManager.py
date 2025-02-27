@@ -38,7 +38,7 @@ class EventManager:
 
           def check_toggle_settings(self):
                     current_time = self.game.ticks
-                    if self.game.inputM.get("ungrab") and self.settings_timer.check(current_time) and not self.game.in_menu and not self.game.died and not self.game.won and not self.game.cards_on:  # Toggle settings menu if conditions met
+                    if self.game.inputM.get("ungrab") and self.settings_timer.check(current_time) and not self.game.in_menu and not self.game.died and not self.game.won and not self.game.cards_on and not self.game.playing_transition:  # Toggle settings menu if conditions met
                               self.toggle_settings()
                               self.settings_timer.reactivate(current_time)  # Reset the cooldown timer
 

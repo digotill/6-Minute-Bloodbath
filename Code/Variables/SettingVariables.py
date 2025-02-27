@@ -23,7 +23,7 @@ GENERAL = {  # General game settings
           'brightness': (1.5, 1.5, 50),  # max, min, paused
           'sparks': (20, 0.3, 3.5, 0.1),  # friction, width, height, min_vel
           'hash_maps': (32, 48, 16, 96, 96, 32, 64, 16, 48, 16),  # Enemies, Bullets, Tilemap, Rain, Objects, Particles, Effects, XP, blood count
-          'cooldowns': (0.5, 0.1, 0.6, 3),  # toggle cooldowns, value checker cooldown, choose card cooldown, upgrade text dissapear time
+          'cooldowns': (0.25, 0.1, 0.6, 3),  # toggle cooldowns, value checker cooldown, choose card cooldown, upgrade text dissapear time
           'animation_speeds': (15, 20, 10, 20, 30, 15, 20),  # main menu background, transition, you died, muzzleflash, casing, blood
           "enviroment_density": (0.05, 16, 150),
           "misc": ("spas12", 100, (20, 0.5), 0.05, 0.05, 2, 5)}  # starting weapon, enemy spawn distance, screen shake on hit, text update frequancy, music fadeout, number of cards
@@ -113,7 +113,7 @@ BUTTONS = {  # Button settings for various game states
                     "volume": M.create_slider(v2(450, 315), "sound volume:  ", 0, 100, 50, AM.assets["button12"], {"axis": "x", "axisl": "max", "text_pos": "right"}),
                     "text_size": M.create_slider(v2(450, 270), "text size:  ", 120, 200, 120, AM.assets["button12"], {"axis": "x", "axisl": "max", "text_pos": "right"})},
           "End_Screen_Buttons": {
-                    "restart": M.create_button("restart", v2(240, 270), AM.assets["button8"], {"axis": "y", "axisl": "max", "res": (92, 30)}),
+                    "restart": M.create_button("return", v2(240, 270), AM.assets["button8"], {"axis": "y", "axisl": "max", "res": (92, 30)}),
                     "quit": M.create_button("quit", v2(400, 270), AM.assets["button8"], {"axis": "y", "axisl": "max", "res": (92, 30)})},
           "Won_Screen_Buttons": {
                     "restart": M.create_button("restart", v2(240, 270), AM.assets["button20"], {"axis": "y", "axisl": "max", "res": (92, 30)}),
