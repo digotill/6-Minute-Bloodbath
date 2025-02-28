@@ -8,6 +8,8 @@ class Background:
                     self.length = len(frames) - 1  # Total number of frames minus one
                     self.images = frames  # List of image surfaces for the animation
                     self.animation_speed = animation_speed  # Speed of the animation
+                    if self.images[0].size != self.game.displayS.size:
+                              self.images = [pygame.transform.scale(image, self.game.displayS.size) for image in self.images]
 
           def draw(self):
                     # Calculate current frame index, wrapping around if needed

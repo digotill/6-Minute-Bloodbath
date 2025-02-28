@@ -1,6 +1,3 @@
-import pygame
-from pygame.math import Vector2 as v2
-from Code.DataStructures.Timer import Timer
 from Code.Variables.SettingVariables import *
 
 
@@ -12,18 +9,19 @@ class InputManager:
                               'move_left': Input(self.game, pygame.K_a),
                               'move_down': Input(self.game, pygame.K_s),
                               'move_right': Input(self.game, pygame.K_d),
+                              'jump': Input(self.game, pygame.K_SPACE),
                               'sprint': Input(self.game, pygame.K_LSHIFT),
                               'dodge': Input(self.game, pygame.K_SPACE, 1),
                               'toggle_fullscreen': Input(self.game, pygame.K_F11, 0.5),
                               'toggle_fps': Input(self.game, pygame.K_F12, 0.2),
                               'quit': Input(self.game, pygame.K_F10),
-                              'ungrab': Input(self.game, pygame.K_ESCAPE)
+                              'ungrab': Input(self.game, pygame.K_ESCAPE),
                     }
                     self.mouse = {
-                              "left": False,
-                              "right": False,
+                              "left_click": False,
+                              "right_click": False,
                               "position": v2(0, 0),
-                              "rel_position": v2(0, 0)
+                              "real_position": v2(0, 0)
                     }
 
           def get_mouse(self, key):
@@ -41,12 +39,16 @@ class InputManager:
                     for input_obj in self.keys.values():
                               input_obj.update(keys)
 
-                    self.mouse["left"], _, self.mouse["right"] = pygame.mouse.get_pressed()
+                    self.mouse["left_click"], _, self.mouse["right_click"] = pygame.mouse.get_pressed()
                     mouse_pos = pygame.mouse.get_pos()
                     self.mouse["real_position"] = v2(max(0, min(mouse_pos[0], self.game.display.width)),
                                                 max(0, min(mouse_pos[1], self.game.display.height)))
-                    self.mouse["position"] = v2(int(self.mouse["position"].x * self.game.render_resolution[0] / self.game.display.width),
-                                                    int(self.mouse["position"].y * self.game.render_resolution[1] / self.game.display.height))
+                    self.mouse["position"] = v2(int(self.mouse["real_position"].x * self.game.render_resolution[0] / self.game.display.width),
+                                                    int(self.mouse["real_position"].y * self.game.render_resolution[1] / self.game.display.height))
+                    if self.mouse["real_position"] != mouse_pos: pygame.mouse.set_pos(self.mouse["real_position"])  # Update mouse position if changed
+
+                    if self.game.auto_shoot and not self.game.changing_settings and not self.game.in_menu and not self.game.died:
+                              self.mouse["left_click"] = True
 
 
 class Input:

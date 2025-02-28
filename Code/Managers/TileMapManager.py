@@ -56,7 +56,7 @@ class TileMapManager:
 
           @staticmethod
           def _generate_noise_map(noise, scale):
-                    size = MISC["enviroment_density"][1]  # Get environment density size
+                    size = GENERAL["enviroment_density"][1]  # Get environment density size
                     width, height = GAMESIZE[0] // size + 1, GAMESIZE[1] // size + 1  # Calculate map dimensions
                     noise_map = [[noise([i * scale, j * scale]) for j in range(width)] for i in range(height)]  # Generate noise map
                     return (np.array(noise_map) + 1) / 2  # Normalize noise values to [0, 1]

@@ -25,7 +25,7 @@ class Gun:
                     self.update_shooting()  # Update shooting mechanics
 
           def draw(self, surface):
-                    if not self.game.died:  # Only draw if player is alive
+                    if not self.game.died and not self.game.won:  # Only draw if player is alive
                               if self.game.player.facing == "right":
                                         self.rotated_image = pygame.transform.rotate(  # Rotate gun image for right-facing
                                                   self.gun_image, self.angle + 90)
@@ -38,29 +38,29 @@ class Gun:
                                        self.game.cameraM.rect.x)
                               pos_y = (self.game.player.rect.centery +  # Calculate gun y position
                                        math.cos(math.radians(self.angle)) * self.distance -
-                                       self.game.cameraM.rect.y)
-                              self.rect = self.rotated_image.get_rect(center=(pos_x, pos_y))  # Update gun rectangle
+                                       self.game.cameraM.rect.y) + 1
+                              self.rect = self.rotated_image.get_rect(center=(pos_x, pos_y + self.game.player.air_offset))  # Update gun rectangle
                               surface.blit(self.rotated_image, self.rect)  # Draw gun on surface
 
           def calc_angle(self):
                     # Calculate x difference to mouse
-                    change_in_x = self.game.player.rect.centerx - self.game.cameraM.rect.x - self.game.correct_mouse_pos[0]
+                    change_in_x = self.game.player.rect.centerx - self.game.cameraM.rect.x - self.game.inputM.get("position")[0]
                     # Calculate y difference to mouse
-                    change_in_y = self.game.player.rect.centery - self.game.cameraM.rect.y - self.game.correct_mouse_pos[1]
+                    change_in_y = self.game.player.rect.centery - self.game.cameraM.rect.y - self.game.inputM.get("position")[1]
                     self.angle = v2(change_in_x, change_in_y).angle_to((0, 1))  # Calculate angle to mouse
 
           def update_shooting(self):
                     current_time = self.game.game_time  # Get current game time
                     if self.can_shoot(current_time):  # Check if gun can shoot
                               self.shoot(current_time)  # Perform shooting
-                    elif not self.game.mouse_state[0]:  # If mouse button released
+                    elif not self.game.inputM.get("left_click"):  # If mouse button released
                               self.continuous_fire_start = None  # Reset continuous fire
 
           def can_shoot(self, current_time):
                     return (self.fire_rate + self.last_shot < current_time and  # Check cooldown
-                            self.game.mouse_state[0] and  # Check mouse pressed
+                            self.game.inputM.get("left_click") and  # Check mouse pressed
                             not self.game.changing_settings and  # Check not in settings
-                            not self.game.died)  # Check player alive
+                            not self.game.died and not self.game.won and not self.game.cards_on and not self.game.player.is_on_air)  # Check player alive
 
           def shoot(self, current_time):
                     if self.continuous_fire_start is None:  # If starting to fire
@@ -72,26 +72,14 @@ class Gun:
 
                     self.last_shot = current_time  # Update last shot time
 
-                    start_coordinates = self.calculate_bullet_start_position()  # Get bullet start position
+                    self.game.soundM.play_sound(self.name + "_shot", VOLUMES["gun_shot_frequancy"], VOLUMES["gun_shot_volume"] * self.game.master_volume)  # Play gun shot sound
 
-                    self.game.soundM.play_sound(self.name + "_shot", 0.1)  # Play gun shot sound
-
+                    self.game.muzzleflashM.add_muzzle_flash(self.calculate_position(2), 270 - self.angle, True if self.game.player.facing == "left" else False)  # Create muzzle flash
+                    self.game.casingM.add_casing(self.game.player.rect.center, True if self.game.player.facing == "left" else False)
                     for _ in range(self.shots):  # For each shot
-                              self.game.sparkM.create_spark(270 - self.angle, start_coordinates, SPARKS['muzzle_flash'])   # Create muzzle flash
+                              self.game.bulletM.add_bullet(self.calculate_position(3), self.game.methods.change(self.angle, self.spread), "Player Bullet", spread_factor)
 
-                              if self.shots == 1:  # If single shot
-                                        self.game.bulletM.add_bullet(  # Add bullet without spread
-                                                  start_coordinates, self.angle,
-                                                  "Player Bullet", spread_factor)
-                              else:  # If multiple shots
-                                        self.game.bulletM.add_bullet(  # Add bullet with spread
-                                                  start_coordinates,
-                                                  self.game.methods.change(self.angle, self.spread),
-                                                  "Player Bullet", spread_factor)
-
-          def calculate_bullet_start_position(self):
-                    start_x = self.game.player.rect.centerx + math.sin(math.radians(self.angle)) * int(
-                              self.distance - self.res[0])  # Calculate bullet start x
-                    start_y = self.game.player.rect.centery + math.cos(math.radians(self.angle)) * int(
-                              self.distance - self.res[0])  # Calculate bullet start y
+          def calculate_position(self, ratio):
+                    start_x = self.game.player.rect.centerx + math.sin(math.radians(self.angle)) * int(self.distance - self.res[0] / ratio)  # Calculate bullet start x
+                    start_y = self.game.player.rect.centery + math.cos(math.radians(self.angle)) * int(self.distance - self.res[0] / ratio)  # Calculate bullet start y
                     return start_x, start_y  # Return start coordinates

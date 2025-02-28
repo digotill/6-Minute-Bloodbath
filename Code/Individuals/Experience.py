@@ -44,6 +44,7 @@ class Experience:
           def collect(self):
                     # Add XP to the player
                     self.game.player.xp_to_add += self.xp_amount
+                    self.game.soundM.play_sound("picked_xp", VOLUMES["picked_xp_frequancy"], VOLUMES["picked_xp_volume"] * self.game.master_volume)
                     # You might want to add some visual or sound effect here
 
           def update_rect(self):

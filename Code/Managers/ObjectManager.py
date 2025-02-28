@@ -21,7 +21,7 @@ class ObjectManager:
                     self.grid.rebuild()  # Rebuild the spatial hash grid to optimize object lookup
 
           def _generate_trees(self):
-                    size = MISC["enviroment_density"][1]
+                    size = GENERAL["enviroment_density"][1]
                     sorted_biomes = sorted(BIOMES.items(), key=lambda x: x[1])  # Sort biomes for efficient lookup
                     for y in range(0, GAMESIZE[1], size):
                               for x in range(0, GAMESIZE[0], size):
@@ -33,14 +33,15 @@ class ObjectManager:
                                                   self._place_tree(x, y, biome)  # Place a tree of the appropriate biome type
 
           def _generate_rocks(self):
-                    for _ in range(MISC["enviroment_density"][2]):  # Generate a fixed number of rocks
-                              image = random.choice(AM.assets["rock"])  # Choose a random rock image
+                    for _ in range(GENERAL["enviroment_density"][2]):  # Generate a fixed number of rocks
+                              number = random.randint(1, 5)  # Randomly choose the number of rock images
+                              image = AM.assets["rock" + str(number)]  # Choose a random rock image
                               pos = self.generate_valid_position(image.size)  # Find a valid position for the rock
                               if pos:
                                         self.grid.insert(Object(self.game, image, image.size, pos))  # Add the rock to the game world
 
           def generate_grass(self):
-                    size = MISC["enviroment_density"][1]
+                    size = GENERAL["enviroment_density"][1]
                     for tile in self.game.tilemapM.grid.items:
                               if tile.tile_type == "grass_tile":  # Only place grass on grass tiles
                                         biome_x, biome_y = int(tile.position.x) // size, int(tile.position.y) // size
@@ -85,7 +86,7 @@ class ObjectManager:
 
           @staticmethod
           def _should_place_tree(density_value, biome_density_factor):
-                    return random.random() < density_value * MISC["enviroment_density"][0] * biome_density_factor  # Probability check for tree placement
+                    return random.random() < density_value * GENERAL["enviroment_density"][0] * biome_density_factor  # Probability check for tree placement
 
           def _place_tree(self, x, y, biome):
                     tree_image = random.choice(self.game.assets[biome + "_tree"])  # Choose a random tree image for the biome

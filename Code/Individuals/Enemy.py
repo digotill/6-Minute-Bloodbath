@@ -12,15 +12,15 @@ class Enemy:
                     self.set_coordinates()
                     self.game.methods.set_rect(self)
 
-                    self.health *= DIFFICULTY[self.game.difficulty][1]
-                    self.vel *= DIFFICULTY[self.game.difficulty][0]
-                    self.damage *= DIFFICULTY[self.game.difficulty][2]
+                    self.health *= DIFFICULTY[self.game.difficulty][1] * (DIFFICULTY["win_change"][1] ** self.game.wins)
+                    self.vel *= DIFFICULTY[self.game.difficulty][0] * (DIFFICULTY["win_change"][0] ** self.game.wins)
+                    self.damage *= DIFFICULTY[self.game.difficulty][2] * (DIFFICULTY["win_change"][2] ** self.game.wins)
 
                     self.acceleration = v2(0, 0)
                     self.vel_vector = v2(0, 0)
                     self.max_vel = self.vel
                     self.max_health = self.health
-                    self.current_animation = 'moving'
+                    self.current_animation = 'running'
                     self.is_attacking = False
                     self.hit_count = None
                     self.dead = False
@@ -39,13 +39,19 @@ class Enemy:
 
           def set_coordinates(self):
                     # Set initial coordinates for the enemy spawn
-                    s = MISC["enemy_spawns"]
-                    rect2 = self.game.cameraM.rect
-                    rect1 = pygame.Rect(rect2.left - s, rect2.top - s, rect2.width + 2 * s, rect2.height + 2 * s)
+                    s = GENERAL["misc"][1]
+                    camera_rect = self.game.cameraM.rect
+                    spawn_area = pygame.Rect(camera_rect.left - s, camera_rect.top - s, camera_rect.width + 2 * s, camera_rect.height + 2 * s)
+
                     while True:
-                              x = random.randint(rect1.left, rect1.right - self.res[0])
-                              y = random.randint(rect1.top, rect1.bottom - self.res[1])
-                              if not self.game.cameraM.rect.collidepoint(x, y):
+                              x = random.randint(spawn_area.left, spawn_area.right - self.res[0])
+                              y = random.randint(spawn_area.top, spawn_area.bottom - self.res[1])
+
+                              # Create a rect for the potential enemy position
+                              enemy_rect = pygame.Rect(x, y, self.res[0], self.res[1])
+
+                              # Check if the enemy is outside the camera view and within the game boundaries
+                              if not camera_rect.colliderect(enemy_rect) and 0 <= x < GAMESIZE[0] - self.res[0] and 0 <= y < GAMESIZE[1] - self.res[1]:
                                         self.pos = v2(x, y)
                                         break
 
@@ -139,12 +145,12 @@ class Enemy:
                     pos = self.get_position()
                     current_sprite = self.get_current_sprite()
                     if self.has_shadow:
-                              shadow_image = self.game.methods.get_shadow_image(self, current_sprite)
-                              self.game.displayS.blit(shadow_image, (pos[0], pos[1] + self.res[1] - shadow_image.height / 2))
+                        shadow_image = self.game.methods.get_shadow_image2(self, self.shadow_width)
+                        self.game.displayS.blit(shadow_image, (pos[0] + self.res[0] / 2 - shadow_image.width / 2, pos[1] + self.res[1] - shadow_image.height / 2))
                     if self.hit_count is not None:
                               current_sprite = self.game.methods.get_image_mask(current_sprite)
-                              self.hit_count += MISC["hit_effect"][1] * self.game.dt
-                              if self.hit_count >= MISC["hit_effect"][0]:
+                              self.hit_count += self.hit_effect[1] * self.game.dt
+                              if self.hit_count >= self.hit_effect[0]:
                                         self.hit_count = None
                     surface.blit(current_sprite, pos)
 
@@ -167,7 +173,7 @@ class Enemy:
 
           def update_animation(self):
                     # Update the animation based on the enemy's state
-                    new_animation = 'attacking' if self.is_attacking else 'moving'
+                    new_animation = 'attacking' if self.is_attacking else 'running'
                     if self.current_animation != new_animation:
                               self.current_animation = new_animation
                               self.frame = 0
@@ -195,3 +201,6 @@ class Enemy:
                     self.dead = True
                     # Add any death animation or particle effects here
                     self.game.remove_enemy(self)
+
+          def apply_knockback(self, force):
+                    self.apply_force(force * self.knockback)

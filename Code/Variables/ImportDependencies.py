@@ -6,7 +6,6 @@ import os  # For interacting with the operating system
 import ctypes  # For creating and manipulating C data types in Python
 import logging  # For flexible event logging system for applications and libraries
 import time  # For time-related functions
-import threading  # For thread-based parallelism
 import functools  # For higher-order functions and operations on callable objects
 import math  # For mathematical functions
 import random  # For generating random numbers
@@ -24,11 +23,10 @@ from pygame.math import Vector2 as v2  # Vector2 class for 2D vector operations
 from copy import deepcopy  # For creating deep copies of objects
 from itertools import product  # For creating cartesian products of iterables
 from pstats import Stats  # For profiling statistics
-#from memory_profiler import profile  # For memory profiling
-#from line_profiler import profile    # For profiling Python code use kernprof -l -v run.py
+
 
 # Local imports
-from Code.Shaders import PygameShaders  # Custom shader module
+from Code.Shaders import Shader  # Custom shader module
 from Code.Variables.LoadAssets import *  # Asset loading module
 from Code.DataStructures.Timer import *  # Custom timer module
 from Code.Utilities.Methods import *  # Utility methods module

@@ -5,30 +5,63 @@ from Code.DataStructures.HashMap import *
 class EnemyManager:
           def __init__(self, game):
                     self.game = game
+
                     self.grid = HashMap(game, GENERAL["hash_maps"][0])  # Spatial hash grid for efficient enemy management
                     self.enemy_pool = set()  # Pool of inactive enemies for reuse
+
                     self.spawn_timer = Timer(GENERAL["enemies"][1], self.game.game_time)  # Timer for enemy spawning
-                    self.enemy_multiplier = 1  # Multiplier for enemy attributes (e.g., health, damage)
+                    self.seperation_timer = Timer(GENERAL["enemies"][3], self.game.game_time)
+                    self.rebuild_timer = Timer(GENERAL["enemies"][4], self.game.game_time)
 
           def update(self):
-                    if not self.game.changing_settings:
+                    if not self.game.changing_settings and self.game.game_time > 5 and not self.game.cards_on:
                               for enemy in self.grid.items:
                                         enemy.update()  # Update each enemy's state
-                                        if random.random() < 0.05:  # 5% chance to apply separation force
+                                        if self.seperation_timer.update(self.game.game_time):
                                                   separation_force = self.calculate_separation(enemy)
                                                   enemy.apply_force(separation_force)  # Apply separation to avoid crowding
+                                                  self.seperation_timer.reactivate(self.game.game_time)
 
                               self.remove_dead_enemies()  # Clean up dead enemies
 
                               self._add_enemies()  # Spawn new enemies if necessary
 
-                              if random.random() < 0.1:  # 10% chance to rebuild grid
+                              if self.rebuild_timer.update(self.game.game_time):
                                         self.grid.rebuild()  # Periodically rebuild spatial hash grid
+                                        self.rebuild_timer.reactivate(self.game.game_time)
 
           def _add_enemies(self):
                     if self.spawn_timer.update(self.game.game_time):
-                              self.add_enemy("mantis")  # Spawn new enemies if timer is up
+                              current_time = self.game.game_time
+
+                              # Find the appropriate progression stage
+                              current_stage = max([time for time in PROGRESSION.keys() if time <= current_time])
+                              enemy_probabilities = PROGRESSION[current_stage]
+
+                              # Calculate total probability
+                              total_prob = sum(enemy_probabilities.values())
+
+                              # Generate a random number
+                              rand_num = random.random() * total_prob
+
+                              # Select an enemy type based on probabilities
+                              cumulative_prob = 0
+                              for enemy_type, prob in enemy_probabilities.items():
+                                        cumulative_prob += prob
+                                        if rand_num <= cumulative_prob:
+                                                  if enemy_type != "nothing":
+                                                            self.add_enemy(enemy_type)
+                                                  break
+
+                              # Reset the spawn timer
                               self.spawn_timer.reactivate(self.game.game_time)
+
+                    for key in BOSSES.keys():
+                              if self.game.game_time >= key and not getattr(self, BOSSES[key] + "_spawned", False) and GENERAL["enemies"][2]:
+                                        enemy = Enemy(self.game, ENEMIES[BOSSES[key]])
+                                        self.grid.insert(enemy)
+                                        setattr(self, BOSSES[key] + "_spawned", True)
+                                        break
 
           def add_enemy(self, enemy_type):
                     if len(self.grid.items) < GENERAL["enemies"][0] and GENERAL["enemies"][2]:  # Check enemy limit and spawn flag
@@ -49,6 +82,8 @@ class EnemyManager:
                                         self.enemy_pool.add(enemy)  # Add dead enemy back to pool for reuse
                                         xp_type = self.get_experience(enemy)
                                         self.game.experienceM.add_experience(xp_type, enemy.rect.center)  # Add enemy's experience to player's total
+                                        if enemy.spawn_blood:
+                                                  self.game.effectM.draw_at(enemy.rect)
 
           @staticmethod
           def get_experience(enemy):

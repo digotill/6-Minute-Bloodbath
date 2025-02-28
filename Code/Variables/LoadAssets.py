@@ -18,6 +18,8 @@ class LoadAssets:
 
                                         if "tileset" in file_name.lower():
                                                   self.load_tileset(file_path, file_name)
+                                        elif "music" in file_name.lower():
+                                                  self.load_music(file_path, file_name)
                                         elif file_ext.lower() in ['.png', '.jpg', '.jpeg']:
                                                   self.load_image(file_path, file_name)
                                         elif file_ext.lower() == '.gif':
@@ -60,3 +62,6 @@ class LoadAssets:
                               for j in range(4):
                                         add_tile(i * 4 + j, (j, i))
                     self.assets[name] = dictionary
+
+          def load_music(self, file_path, name):
+                    self.assets[name] = file_path

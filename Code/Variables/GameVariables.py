@@ -1,56 +1,83 @@
+import pygame
+import gc
 from Code.Variables.SettingVariables import *
+from Code.Individuals.Gun import *
 
 
 class GameVariables:
           def __init__(self, game):
-                    self.game = game  # Store reference to the game object
+                    self.game = game
+                    self.initialize_game_flags()
+                    self.initialize_game_settings()
+                    self.initialize_game_state()
+                    self.update_font_sizes()
+                    self.update()
 
-                    self.game.changing_settings = False  # Flag for settings change state
-                    self.game.immidiate_quit = False  # Flag for immediate game quit
-                    self.game.in_menu = True  # Flag for menu state
-                    self.game.restart = False  # Flag for game restart
-                    self.game.running = True  # Flag for game running state
-                    self.game.died = False  # Flag for player death
-                    self.game.playing_transition = False  # Flag for transition state
-                    self.game.playing_end_trantition = False  # Flag for end screen transition state
+          def initialize_game_flags(self):
+                    flags = {
+                              'changing_settings': False, 'immidiate_quit': False, 'in_menu': True, 'restart': False, 'running': True, 'died': False,
+                              'playing_transition': False, 'playing_end_trantition': False, 'loaded_game': False, 'music': True, 'auto_shoot': False,
+                              'won': False, 'cards_on': False}
+                    for flag, value in flags.items():
+                              setattr(self.game, flag, value)
 
-                    self.game.assets = AM.assets  # Store game assets
-                    self.game.methods = M  # Store game methods
-                    self.game.render_resolution = RENRES  # Set render resolution
-
-                    self.game.game_time = 0  # Initialize game time
-                    self.game.difficulty = "medium"  # Set default difficulty
-                    self.game.fps = HZ  # Set frames per second
-                    self.game.stats = pd.DataFrame(columns=['Coins', 'Level', 'Enemies Killed'])  # Initialize stats
-                    self.game.uiS.set_colorkey((0, 0, 0))  # Set UI surface transparency
-                    self.game.player = None  # Initialize player object
+          def initialize_game_settings(self):
+                    self.game.assets = AM.assets
+                    self.game.methods = M
+                    self.game.render_resolution = RENRES
+                    self.game.difficulty = "medium"
+                    self.game.fps = 240
                     self.game.reduced_screen_shake = 1
                     self.game.colour_mode = 50
-                    self.game.volume = 0.5
+                    self.game.master_volume = 1
                     self.game.text_size = 1
 
-                    self.update()  # Call update method
+          def initialize_game_state(self):
+                    self.game.game_time = 0
+                    self.game.lag = 0
+                    self.game.uiS.set_colorkey((0, 0, 0))
+                    self.game.player = None
 
           def update_font_sizes(self):
-                    self.game.assets["font8"] = pygame.font.Font("Assets/Fonts/font8.ttf", int(8 * self.game.text_size))
-                    self.game.assets["font14"] = pygame.font.Font("Assets/Fonts/font14.ttf", int(14 * self.game.text_size))
+                    self.game.assets["font8"] = pygame.font.Font("Assets/UI/fonts/font8.ttf", int(8 * self.game.text_size))
 
           def update(self):
-                    # Update game state variables each frame
-                    self.game.inputM.update()  # Update input manager
-                    self.game.keys = pygame.key.get_pressed()  # Get current keyboard state
-                    self.game.mouse_pos = (max(0, min(pygame.mouse.get_pos()[0], self.game.display.width)),
-                                           max(0, min(pygame.mouse.get_pos()[1], self.game.display.height)))  # Get clamped mouse position
-                    self.game.correct_mouse_pos = (int(self.game.mouse_pos[0] * self.game.render_resolution[0] / self.game.display.width),
-                                                   int(self.game.mouse_pos[1] * self.game.render_resolution[1] / self.game.display.height))  # Calculate corrected mouse position
-                    if self.game.mouse_pos != pygame.mouse.get_pos(): pygame.mouse.set_pos(self.game.mouse_pos)  # Update mouse position if changed
-                    self.game.mouse_state = pygame.mouse.get_pressed()  # Get current mouse button state
-                    if self.game.clock.get_fps() != 0:
-                              self.game.dt = 1 / self.game.clock.get_fps()  # Calculate delta time
-                    else:
-                              self.game.dt = 0
-                    if not self.game.changing_settings and not self.game.in_menu: self.game.game_time += self.game.dt  # Update game time
-                    self.game.ticks = pygame.time.get_ticks() / 1000  # Get current time in seconds
-                    if self.game.ticks % 10 == 0: gc.collect()  # Perform garbage collection every 10 seconds
-                    if self.game.player is not None and self.game.player.health <= 0: self.game.died = True  # Check for player death
-                    self.update_font_sizes()  # Update font sizes
+                    self.update_display_info()
+                    self.update_input()
+                    self.update_delta_time()
+                    self.update_game_time()
+                    self.update_ticks()
+                    self.check_player_death()
+                    self.check_font_update()
+                    self.check_fullscreen()
+                    self.check_win_condition()
+
+          def update_display_info(self):
+                    self.game.displayinfo = pygame.display.Info()
+
+          def update_input(self):
+                    self.game.inputM.update()
+
+          def update_delta_time(self):
+                    fps = self.game.clock.get_fps()
+                    self.game.dt = min(1 / fps, 1 / 60) if fps != 0 else 0
+
+          def update_game_time(self):
+                    if not self.game.changing_settings and not self.game.in_menu and not self.game.cards_on:
+                              self.game.game_time += self.game.dt
+
+          def update_ticks(self):
+                    self.game.ticks = pygame.time.get_ticks() / 1000
+
+          def check_player_death(self):
+                    if self.game.player is not None and self.game.player.health <= 0 and not self.game.won and not self.game.cards_on: self.game.died = True
+
+          def check_font_update(self):
+                    if self.game.changing_settings or self.game.in_menu or self.game.died or self.game.won: self.update_font_sizes()
+
+          def check_fullscreen(self):
+                    self.game.fullscreen = pygame.display.is_fullscreen()
+
+          def check_win_condition(self):
+                    if (getattr(self.game, "enemyM", None) is not None and len(self.game.enemyM.grid.items) == 0 and getattr(self.game, "player", None) is not None and
+                            not self.game.player.dead and self.game.game_time > 380): self.game.won = True

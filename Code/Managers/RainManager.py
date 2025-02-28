@@ -16,7 +16,7 @@ class RainManager:
                     self.grid.rebuild()  # Initialize the spatial hash grid
 
           def update(self):
-                    if not self.game.changing_settings:
+                    if not self.game.changing_settings and not self.game.cards_on:
                               for rain_droplet in self.grid.items:
                                         rain_droplet.update()  # Update position and state of each rain droplet
                                         if rain_droplet.hit_ground:

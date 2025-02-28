@@ -9,7 +9,7 @@ class BulletManager:
                     self.bullet_pool = set()  # Object pool for bullet reuse
 
           def update(self):
-                    if not self.game.changing_settings:
+                    if not self.game.changing_settings and not self.game.cards_on:
                               current_time = self.game.game_time
                               for bullet in self.grid.items:
                                         bullet.update()
@@ -31,7 +31,7 @@ class BulletManager:
                     self.grid.insert(bullet)
 
                     # Add screen shake effect
-                    array = SHAKE[self.game.player.gun.name]
+                    array = self.game.player.gun.screen_shake, 0.1
                     self.game.cameraM.add_screen_shake(array[1], array[0] * self.game.reduced_screen_shake)
 
           def check_dead_bullets(self):

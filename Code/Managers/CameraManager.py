@@ -28,7 +28,7 @@ class CameraManager():
                     self.noise_map = PerlinNoise(MAP["camera_shake_map"][0], random.randint(0, 100000))
 
           def update(self):
-                    if not self.game.died:
+                    if not self.game.died and not self.game.won:
                               # Update camera position based on player movement
                               self.pos = v2(self.game.player.pos.x - self.res[0] / 2, self.game.player.pos.y - self.res[1] / 2)
 
@@ -41,8 +41,8 @@ class CameraManager():
 
           def update_mouse_smoothing(self):
                     # Calculate target mouse position relative to screen center
-                    mouse_target = v2(self.game.correct_mouse_pos[0] - 0.5 * self.res[0],
-                                      self.game.correct_mouse_pos[1] - 0.5 * self.res[1])
+                    mouse_target = v2(self.game.inputM.get("position")[0] - 0.5 * self.res[0],
+                                      self.game.inputM.get("position")[1] - 0.5 * self.res[1])
 
                     # Apply smoothing to mouse movement
                     dt = min(self.game.dt, 1 / 20)
@@ -64,10 +64,11 @@ class CameraManager():
                               self.window_max_offset * int(self.mouse_smoothing.y)
                     )
 
+                    dt = min(self.game.dt, 1 / 20)
                     # Smoothly interpolate current offset towards target offset
                     self.current_offset = v2(
-                              self.game.methods.lerp(self.current_offset.x, self.target_offset.x, self.lerp_speed * self.game.dt),
-                              self.game.methods.lerp(self.current_offset.y, self.target_offset.y, self.lerp_speed * self.game.dt)
+                              self.game.methods.lerp(self.current_offset.x, self.target_offset.x, self.lerp_speed * dt),
+                              self.game.methods.lerp(self.current_offset.y, self.target_offset.y, self.lerp_speed * dt)
                     )
 
                     return v2(round(self.current_offset.x), round(self.current_offset.y))
@@ -88,15 +89,15 @@ class CameraManager():
                     player_bottom = player_top + player.res[1]
 
                     # Adjust camera if player is too close to the edges
-                    if player_left < player.offset[0]:
-                              self.rect.x += player_left - player.offset[0]
-                    elif player_right > self.res[0] - player.offset[2]:
-                              self.rect.x += player_right - (self.res[0] - player.offset[2])
+                    if player_left < player.offset:
+                              self.rect.x += player_left - player.offset
+                    elif player_right > self.res[0] - player.offset:
+                              self.rect.x += player_right - (self.res[0] - player.offset)
 
-                    if player_top < player.offset[1]:
-                              self.rect.y += player_top - player.offset[1]
-                    elif player_bottom > self.res[1] - player.offset[3]:
-                              self.rect.y += player_bottom - (self.res[1] - player.offset[3])
+                    if player_top < player.offset:
+                              self.rect.y += player_top - player.offset
+                    elif player_bottom > self.res[1] - player.offset:
+                              self.rect.y += player_bottom - (self.res[1] - player.offset)
 
                     # Ensure camera stays within game boundaries
                     self.rect.x = max(0, min(self.rect.x, GAMESIZE[0] - self.res[0]))

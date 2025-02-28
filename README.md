@@ -1,6 +1,6 @@
 # Survivor Coursework Project
 
-![Game Cover](Assets/UI/cover2.png)
+![Game Cover](Assets/UI/images/cover2.png)
 
 ## 🎮 About The Game
 
@@ -9,7 +9,6 @@
 ## 🚀 Features
 
 - Engaging 2D top-down gameplay
-- Dynamic enemy AI
 - Multiple weapons with unique characteristics
 - Perlin noise-generated environments
 - Advanced particle systems for visual effects
@@ -17,7 +16,7 @@
 
 ## 🖼 Screenshots
 
-![Gameplay Screenshot](Assets/UI/game_screenshot.png)
+![Gameplay Screenshot](Assets/UI/images/game_screenshot.png)
 
 ## 📦 Dependencies
 
@@ -48,22 +47,15 @@ Simply run the provided "run.exe" file to start the game.
 - Mouse: Aim
 - Left Click: Shoot
 - Shift: Sprint
+- Jump: Space
 - ESC: Pause game
-
-## 🐛 Known Issues
-
-1. Memory Leak: The game may experience gradual memory usage increase over extended play sessions.
-
-2. Performance Dips: Users might experience temporary drops in frame rate during certain high-intensity actions or in areas with many entities.
-
-3. Tile Orientation: In rare cases, some tiles may not be properly oriented. This is a visual glitch and doesn't affect gameplay.
 
 ### Packaging the Game
 
 To create an executable, use pyinstaller:
 
 ```bash
-pyinstaller Run.py --onefile --windowed --noconsole --add-data "Assets:Assets" --add-data "Code:Code"
+pyinstaller --clean --icon=C:\Users\digot\PycharmProjects\Survivor-Coursework-Project\Assets\UI\images\cover.png Run.py --onedir --windowed --noconsole --add-data "Code:Code"
 ```
 
 ## 👨‍💻 Authors
@@ -77,7 +69,6 @@ This project is licensed under the [MIT license] - see the [LICENSE](LICENSE.md)
 ## 🙏 Acknowledgments
 
 - Special thanks to [DaFluffyPotato](https://github.com/DaFluffyPotato) for some of the code used in this project
-  - Spark system implementation
   - Grass system implementation
 - Inspiration drawn from various top-down survival games
 - Thanks to the Pygame and OpenGL communities for their excellent libraries and documentation

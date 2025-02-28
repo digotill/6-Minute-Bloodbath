@@ -20,6 +20,7 @@ class Bullet:
                     # Set up bullet position and velocity
                     self.pos = v2(pos)
                     self.vel_vector = v2(0, -gun.vel).rotate(-self.angle)
+                    self.original_vel_vector = self.vel_vector
                     self.rect = self.image.get_rect(center=self.pos)
                     self.res = self.rect.size
 
@@ -51,20 +52,21 @@ class Bullet:
 
           def collide(self, target):
                     # Check for collision with a target
-                    if self.rect.colliderect(target.rect) and target not in self.hit_list and not target.dead:
-                              target.health -= self.damage
+                    rect = self.rect.inflate(self.res[0] / 2, self.res[1] / 2)
+                    if rect.colliderect(target.rect) and target not in self.hit_list and not target.dead:
+                              target.health -= self.damage * self.vel_vector.length_squared() / self.original_vel_vector.length_squared()
                               self.pierce -= target.armour
                               self.hit_list.append(target)
 
                               # Add blood effect
                               angle = self.angle if self.angle > 0 else 360 + self.angle
-                              if random.random() < MISC["blood"]:
-                                        self.game.effectM.add_effect(self.pos, angle, EFFECTS["blood"])
+                              if random.random() < BLOOD["blood_amount"] and target.spawn_blood:
+                                        self.game.effectM.add_effect(self.pos, angle, BLOOD["blood"])
 
                               if target.health > 0:
                                         # Apply knockback if the enemy is still alive
-                                        knockback_force = self.vel_vector.normalize() * MISC["bullet_knockback"]
-                                        target.apply_force(knockback_force)
+                                        knockback_force = self.vel_vector.normalize() * self.game.player.gun.knockback
+                                        target.apply_knockback(knockback_force)
 
                               target.hit_count = 0
                               if self.pierce <= 0:

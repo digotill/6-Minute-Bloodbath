@@ -1,6 +1,4 @@
-import pygame
-from pygame import Surface
-from typing import List, Tuple
+from Code.Variables.SettingVariables import *
 
 
 class DrawingManager:
@@ -42,9 +40,10 @@ class DrawingManager:
                     # Add drawable objects from various game managers to the drawables list
                     self.drawables.extend(self.game.objectM.grid.window_query())
                     self.drawables.extend(self.game.enemyM.grid.window_query())
-                    self.drawables.extend(self.game.sparkM.grid.window_query())
                     self.drawables.extend(self.game.bulletM.grid.window_query())
                     self.drawables.extend(self.game.experienceM.grid.window_query())
+                    self.drawables.extend(self.game.casingM.grid.window_query())
+                    self.drawables.extend(self.game.grassM.draw())
                     # Add only rain particles that have hit the ground
                     self.drawables.extend([r for r in self.game.rainM.grid.window_query() if r.hit_ground])
                     # Add the player to the drawables list

@@ -36,6 +36,6 @@ class ScreenEffect:
 
           def blit(self, image, surface):
                     # Create a transparent version of the image
-                    temp_surface = self.game.methods.get_transparent_image(image, self.alpha)
+                    temp_surface = pygame.transform.scale(self.game.methods.get_transparent_image(image, self.alpha), self.game.render_resolution)
                     # Draw the transparent image on the provided surface
                     surface.blit(temp_surface)

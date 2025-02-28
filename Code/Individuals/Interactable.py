@@ -1,6 +1,5 @@
 from Code.Variables.SettingVariables import *
 
-
 # Base class for UI elements
 class Interactable:
           def set_rect(self):
@@ -37,65 +36,69 @@ class Interactable:
                     else:
                               self.text_rect = self.text.get_rect(center=self.rect.center)
 
-          def is_visible_on_screen(self):
-                    # Check if the UI element is visible on the screen
+          def update_is_visible(self):
                     screen_rect = self.game.displayS.get_rect()
-                    return self.rect.colliderect(screen_rect)
+                    self.is_visible = self.rect.colliderect(screen_rect)
 
           def update_text_render(self):
                     # Update the rendered text
-                    if self.has_text:
+                    if self.has_text and self.is_visible:
                               self.font = self.game.assets["font8"]
                               self.text = self.font.render(self.text_input, False, self.base_colour)
                               self.update_text_position()
+                              self.text_timer.reactivate(self.game.ticks)
 
           def check_for_input(self):
                     # Check if the mouse is over the UI element
-                    return self.rect.collidepoint(self.game.correct_mouse_pos)
-
+                    return self.rect.collidepoint(self.game.inputM.get("position"))
 
           def draw(self):
                     # Draw the UI element and its text if visible
-                    if self.is_visible_on_screen():
+                    if self.is_visible:
                               self.game.uiS.blit(self.image, self.rect)
                               if self.has_text:
                                         self.game.uiS.blit(self.text, self.text_rect)
 
           def update(self):
+                    self.update_is_visible()
                     # Update the position and state of the UI element
                     # Handle hover effects and smooth transitions
                     target = self.pos if self.active else v2(self.starting_pos)
 
                     distance = (target - self.current_pos).length()
                     speed_factor = min(distance / (self.speed * self.distance_factor), 1)
-                
-                    if self.rect.collidepoint(self.game.correct_mouse_pos) and self.hover_slide and not self.game.interactablesM.grabbing_slider:
-                        self.current_hover_offset = min(
-                            self.current_hover_offset + self.hover_speed * self.game.dt, self.hover_offset)
+
+                    if self.rect.collidepoint(self.game.inputM.get("position")) and self.hover_slide and not self.game.interactablesM.grabbing_slider:
+                              # Easing out effect for hover
+                              remaining_distance = self.hover_offset - self.current_hover_offset
+                              easing_factor = remaining_distance / self.hover_offset
+                              hover_speed = self.hover_speed * (easing_factor ** 2)  # Quadratic easing
+                              self.current_hover_offset = min(
+                                        self.current_hover_offset + hover_speed * self.game.dt, self.hover_offset)
                     else:
-                        self.current_hover_offset = max(
-                            self.current_hover_offset - self.hover_speed * self.game.dt, 0)
-                
+                              # Quick return when not hovering
+                              self.current_hover_offset = max(
+                                        self.current_hover_offset - self.hover_speed * 2 * self.game.dt, 0)
+
                     # Update the target vector
                     if self.axis == "x":
-                        target.x = (self.pos.x if self.active else self.starting_pos[0])
+                              target.x = (self.pos.x if self.active else self.starting_pos[0])
                     else:  # axis is "y"
-                        target.y = (self.pos.y if self.active else self.starting_pos[1])
-                
+                              target.y = (self.pos.y if self.active else self.starting_pos[1])
+
                     direction = (target - self.current_pos).normalize() if (target - self.current_pos).length_squared() > 0 else v2(0, 0)
                     movement = direction * self.speed * speed_factor * self.game.dt
                     if movement.length() > distance:
-                        self.current_pos = target
+                              self.current_pos = target
                     else:
-                        self.current_pos += movement
-                
+                              self.current_pos += movement
+
                     temp_pos = round(self.current_pos.x + (self.current_hover_offset if self.hover_slide else 0)), round(self.current_pos.y)
                     self.rect.center = temp_pos
 
                     if self.has_text:
                               self.update_text_position()
-
-                    self.update_text_render()
+                              self.update_text_render()
 
           def init_positions(self):
                     # Initialize the positions and text for the UI element
@@ -103,7 +106,8 @@ class Interactable:
                     self.starting_pos = self.calculate_starting_position()
                     self.current_pos = v2(self.starting_pos)
                     self.rect.center = self.current_pos
-                    self.setup_text()
+                    if self.has_text:
+                              self.setup_text()
 
 
 # Button class, inherits from UIElement
@@ -113,15 +117,18 @@ class Button(Interactable):
                     self.game = game
 
                     self.game.methods.set_attributes(self, dictionary)
+                    self.has_text = True
 
                     self.init_positions()
+                    self.text_timer = Timer(self.game.ticks, GENERAL["misc"][3])
+                    self.colour_timer = Timer(self.game.ticks, GENERAL["misc"][4])
+                    self.is_switch = False
 
           def change_colour(self):
                     # Change the color of the button text based on hover state
-                    if self.has_text:
-                              colour = self.hovering_colour if self.rect.collidepoint(self.game.correct_mouse_pos) else self.base_colour
+                    if self.has_text and self.is_visible:
+                              colour = self.hovering_colour if self.rect.collidepoint(self.game.inputM.get("position")) else self.base_colour
                               self.text = self.font.render(self.text_input, False, colour)
-
 
 # Slider class, inherits from UIElement
 class Slider(Interactable):
@@ -131,12 +138,13 @@ class Slider(Interactable):
                     self.game = game
 
                     self.game.methods.set_attributes(self, dictionary)
+                    self.has_text = True
 
                     self.init_positions()
 
                     self.is_dragging = False
-                    self.circle_radius = 0.3 * self.rect.height
-                    self.padding = self.circle_radius * 2
+                    self.circle_radius = 0.2 * self.rect.height
+                    self.padding = self.circle_radius * 3
                     self.circle_surface = pygame.Surface((self.circle_radius * 2, self.circle_radius * 2))
                     self.circle_surface.set_colorkey((0, 0, 0))
                     self.current_colour = self.circle_base_colour
@@ -147,9 +155,11 @@ class Slider(Interactable):
                                                    self.circle_radius * 2, self.circle_radius * 2)
                     self.current_hover_offset = 0  # Add this line
 
+                    self.text_timer = Timer(self.game.ticks, GENERAL["misc"][3])
+
           def draw(self):
                     # Draw the slider, including the line and circle
-                    if self.is_visible_on_screen():
+                    if self.is_visible:
                               self.game.uiS.blit(self.image, self.rect)
 
                               line_start = (self.rect.left + self.padding, self.rect.centery)
@@ -163,6 +173,7 @@ class Slider(Interactable):
                                         self.game.uiS.blit(self.text, self.text_rect)
 
           def update(self):
+                    self.update_is_visible()
                     # Update the slider's position, value, and handle user interaction
                     target = self.pos if self.active else v2(self.starting_pos)
 
@@ -170,32 +181,32 @@ class Slider(Interactable):
                     speed_factor = min(distance / (self.speed * self.distance_factor), 1)
 
                     # Add hover effect logic
-                    if self.rect.collidepoint(self.game.correct_mouse_pos) and self.hover_slide and not self.game.interactablesM.grabbing_slider:
-                        self.current_hover_offset = min(
-                            self.current_hover_offset + self.hover_speed * self.game.dt, self.hover_offset)
+                    if self.rect.collidepoint(self.game.inputM.get("position")) and self.hover_slide and not self.game.interactablesM.grabbing_slider:
+                              self.current_hover_offset = min(
+                                        self.current_hover_offset + self.hover_speed * self.game.dt, self.hover_offset)
                     else:
-                        self.current_hover_offset = max(
-                            self.current_hover_offset - self.hover_speed * self.game.dt, 0)
+                              self.current_hover_offset = max(
+                                        self.current_hover_offset - self.hover_speed * self.game.dt, 0)
 
                     direction = (target - self.current_pos).normalize() if distance > 0 else v2(0, 0)
                     movement = direction * self.speed * speed_factor * self.game.dt
                     if movement.length() > distance:
-                        self.current_pos = target
+                              self.current_pos = target
                     else:
-                        self.current_pos += movement
+                              self.current_pos += movement
 
                     # Apply hover offset
                     if self.axis == "x":
-                        self.rect.centerx = round(self.current_pos.x + (self.current_hover_offset if self.hover_slide else 0))
-                        self.rect.centery = round(self.current_pos.y)
+                              self.rect.centerx = round(self.current_pos.x + (self.current_hover_offset if self.hover_slide else 0))
+                              self.rect.centery = round(self.current_pos.y)
                     else:  # axis is "y"
-                        self.rect.centerx = round(self.current_pos.x)
-                        self.rect.centery = round(self.current_pos.y + (self.current_hover_offset if self.hover_slide else 0))
+                              self.rect.centerx = round(self.current_pos.x)
+                              self.rect.centery = round(self.current_pos.y + (self.current_hover_offset if self.hover_slide else 0))
 
                     self.update_value = False
 
-                    if self.game.mouse_state[0]:
-                              if self.circle_rect.collidepoint(self.game.correct_mouse_pos) and not self.game.interactablesM.grabbing_slider:
+                    if self.game.inputM.get("left_click"):
+                              if self.circle_rect.collidepoint(self.game.inputM.get("position")) and not self.game.interactablesM.grabbing_slider:
                                         self.is_dragging = True
                                         self.game.interactablesM.grabbing_slider = True
                               if self.is_dragging:
@@ -213,9 +224,11 @@ class Slider(Interactable):
                               self.update_text()
 
           def update_text(self):
-                    # Update the text displayed on the slider
-                    self.font = self.game.assets["font8"]
-                    self.text = self.font.render(self.text_input + str(int(self.value)), False, self.base_colour)
+                    if self.is_visible:
+                              # Update the text displayed on the slider
+                              self.font = self.game.assets["font8"]
+                              self.text = self.font.render(self.text_input + str(int(self.value)), False, self.base_colour)
+                              self.text_timer.reactivate(self.game.ticks)
                     self.update_text_position()
 
           def change_colour(self):
@@ -229,7 +242,7 @@ class Slider(Interactable):
 
           def set_value(self):
                     # Set the slider's value based on the mouse position
-                    mouse_x = self.game.correct_mouse_pos[0]
+                    mouse_x = self.game.inputM.get("position")[0]
                     if mouse_x <= self.rect.left + self.padding:
                               self.value = self.min_value
                     elif mouse_x >= self.rect.right - self.padding:
@@ -248,20 +261,23 @@ class Switch(Interactable):
                     self.game = game
 
                     self.game.methods.set_attributes(self, dictionary)
+                    self.has_text = True
 
                     self.init_positions()
 
                     self.cooldown_timer = Timer(GENERAL['cooldowns'][0], self.game.ticks)
+                    self.text_timer = Timer(self.game.ticks, GENERAL["misc"][3])
+                    self.is_switch = True
 
           def change_colour(self):
                     # Change the color of the switch text based on its state (on/off)
-                    if self.has_text:
+                    if self.has_text and self.is_visible:
                               colour = self.hovering_colour if self.on else self.base_colour
                               self.text = self.font.render(self.text_input, False, colour)
 
           def can_change(self):
                     # Check if the switch can change its state (based on cooldown and current state)
-                    return (self.rect.collidepoint(self.game.correct_mouse_pos) and
+                    return (self.rect.collidepoint(self.game.inputM.get("position")) and
                             self.cooldown_timer.check(self.game.ticks) and
                             not self.on)
 
@@ -269,3 +285,52 @@ class Switch(Interactable):
                     # Toggle the switch's state and reset the cooldown timer
                     self.on = not self.on
                     self.cooldown_timer.reactivate(self.game.ticks)
+
+
+class Cards(Interactable):
+          def __init__(self, game, pos, dictionary):
+                    # Initialize the button with game instance and attributes from dictionary
+                    self.game = game
+
+                    self.game.methods.set_attributes(self, dictionary)
+
+                    self.pos = v2(pos)
+                    self.index = None
+                    self.has_text = False
+
+                    self.init_positions()
+
+          def reset(self, dictionary, index):
+                    self.game.methods.set_attributes(self, dictionary)
+                    self.image = self.game.assets["cards"][index]
+
+          def apply_effect(self):
+                    if self.damage != 0:
+                              ratio = int(self.damage / self.game.player.damage * 100)
+                              self.game.player.damage += int(self.damage)
+                              self.game.uiM.toggle_card_upgrade("+ " + str(ratio) + " % damage")
+                    elif self.health != 0:
+                              if self.game.player.health + int(self.health) > self.game.player.max_health:
+                                        self.game.player.health += int(self.health)
+                                        self.game.player.max_health = self.game.player.health
+                              else:
+                                        self.game.player.health += int(self.health)
+                              self.game.player.health = min(self.game.player.health, self.game.player.max_health)
+                              self.game.uiM.toggle_card_upgrade("+ " + str(int(self.health)) + " health")
+                    elif self.pierce != 0:
+                              self.game.player.gun.pierce += int(self.pierce)
+                              self.game.uiM.toggle_card_upgrade("+ " + str(int(self.pierce)) + " bullet pierce")
+                    elif self.attack_speed != 0:
+                              ratio = int(self.attack_speed / self.game.player.gun.fire_rate * 100)
+                              self.game.player.gun.fire_rate -= self.attack_speed
+                              self.game.uiM.toggle_card_upgrade("- " + str(ratio) + " % attack speed")
+                    elif self.stamina != 0:
+                              self.game.player.max_stamina += int(self.stamina)
+                              self.game.uiM.toggle_card_upgrade("+ " + str(int(self.stamina)) + " stamina")
+                    elif self.shots != 0:
+                              self.game.player.gun.pierce += int(self.shots)
+                              self.game.uiM.toggle_card_upgrade("+ " + str(int(self.shots)) + " shots fired")
+                    elif self.knockback != 0:
+                              ratio = int(self.knockback / self.game.player.gun.knockback * 100)
+                              self.game.player.gun.knockback += int(self.knockback)
+                              self.game.uiM.toggle_card_upgrade("+ " + str(ratio) + " % knockback")
