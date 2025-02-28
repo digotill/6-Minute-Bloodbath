@@ -27,7 +27,7 @@ class UIManager:
 
                     # Draw Stamina Bar
                     stamina = max(self.game.player.stamina, 1)  # Ensure stamina is at least 1
-                    stamina_ratio = stamina / PLAYER['stamina']  # Calculate stamina ratio
+                    stamina_ratio = stamina / self.game.player.max_stamina  # Calculate stamina ratio
                     self.draw_bar(
                               bar_image=self.game.assets["stamina_bar"],  # Image for stamina bar
                               outer_image=self.game.assets["bar_outline"],  # Outline image for stamina bar
