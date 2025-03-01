@@ -1,125 +1,156 @@
 from Code.Variables.SettingVariables import *
 from Code.Individuals.ScreenEffect import ScreenEffect
-
+import pygame
+from typing import Optional, Dict, Callable
 
 class ScreenEffectManager:
-          def __init__(self, game):
-                    self.game = game
-                    self.initialize_screen_effects()
-                    self.initialize_flags()
+    def __init__(self, game):
+        """Initialize the ScreenEffectManager with a reference to the game instance."""
+        self.game = game
+        self._initialize_effects()
+        self._initialize_state()
 
-          def initialize_screen_effects(self):
-                    self.transition_effect = ScreenEffect(self.game, self.game.assets["transition_screeneffect"], GENERAL['animation_speeds'][1])
-                    self.youdied_effect = ScreenEffect(self.game, self.game.assets["youdied_screeneffect"], GENERAL['animation_speeds'][2])
-                    self.blood_effect = ScreenEffect(self.game, self.game.assets["blood_screeneffect"], GENERAL['animation_speeds'][6])
-                    self.youwon_effect = ScreenEffect(self.game, self.game.assets["youwin_screeneffect"], GENERAL['animation_speeds'][2])
+    def _initialize_effects(self):
+        """Initialize all screen effects with their assets and animation speeds."""
+        assets = self.game.assets
+        self.effects: Dict[str, ScreenEffect] = {
+            "transition": ScreenEffect(self.game, assets["transition_screeneffect"], GENERAL['animation_speeds'][1]),
+            "you_died": ScreenEffect(self.game, assets["youdied_screeneffect"], GENERAL['animation_speeds'][2]),
+            "you_won": ScreenEffect(self.game, assets["youwin_screeneffect"], GENERAL['animation_speeds'][2]),
+            "blood": ScreenEffect(self.game, assets["blood_screeneffect"], GENERAL['animation_speeds'][6]),
+        }
 
-          def initialize_flags(self):
-                    self.inverted_transition = False
-                    self.youdied_start_time = None
-                    self.youdied_duration = 3
-                    self.youwon_start_time = None
-                    self.youwon_duration = 3
-                    self.draw_restart_transition = False
-                    self.drawing_restart_transition = False
-                    self.play_start_transition = False
-                    self.has_blood_effect = False
-                    self.blood_effect_start_time = None
+    def _initialize_state(self):
+        """Initialize state variables for managing active effects."""
+        self.active_effects: Dict[str, dict] = {}  # Tracks active effects and their states
+        self.transition_direction = 1  # 1 for forward, -1 for reverse
 
-          def set_transition_to_play(self):
-                    self.play_start_transition = True
-                    self.transition_effect.frame = self.transition_effect.length
+    def start_effect(self, effect_name: str, duration: Optional[float] = None, callback: Optional[Callable] = None):
+        """Start an effect with an optional duration and completion callback."""
+        if effect_name not in self.effects:
+            return
+        self.active_effects[effect_name] = {
+            "start_time": self.game.game_time,
+            "duration": duration,
+            "callback": callback,
+            "frame": 0 if effect_name != "transition" else self.effects["transition"].length
+        }
+        if effect_name == "transition":
+            self.transition_direction = -1 if self.game.in_menu else 1
+        self._handle_audio_for_effect(effect_name)
 
-          def add_blood_effect(self):
-                    if not self.has_blood_effect:
-                              self.has_blood_effect = True
-                              self.blood_effect_start_time = self.game.game_time
+    def _handle_audio_for_effect(self, effect_name: str):
+        """Play audio associated with specific effects."""
+        if effect_name == "you_died":
+            pygame.mixer.music.stop()
+            self.game.soundM.play_sound("youdied_sound", VOLUMES["youdied_frequancy"], VOLUMES["youdied_volume"] * self.game.master_volume)
+        elif effect_name == "you_won":
+            pygame.mixer.music.stop()
+            self.game.soundM.play_sound("youwon_sound", VOLUMES["youwon_frequancy"], VOLUMES["youwon_volume"] * self.game.master_volume)
 
-          def draw(self):
-                    self.game.uiM.draw_xp_bar()
-                    self.handle_you_died_effect()
-                    self.handle_you_won_effect()
-                    self.draw_start_transition()
-                    self.handle_menu_to_game_transition()
-                    self.handle_game_start_transition()
-                    self.handle_in_game_transition()
-                    self.handle_restart_transition()
+    def update(self):
+        """Update the state of all active effects."""
+        current_time = self.game.game_time
+        for name, state in list(self.active_effects.items()):
+            effect = self.effects[name]
+            elapsed = current_time - state["start_time"]
 
+            # Remove effect if duration is exceeded
+            if state["duration"] and elapsed > state["duration"]:
+                if state["callback"]:
+                    state["callback"]()
+                del self.active_effects[name]
+                continue
 
-          def draw_start_transition(self):
-                    if self.play_start_transition:
-                              self.transition_effect.draw(-1)
-                              if self.transition_effect.frame < 0:
-                                        self.play_start_transition = False
-                                        self.transition_effect.frame = 0
+            # Handle specific effect updates
+            if name == "transition":
+                effect.frame += self.transition_direction
+                if self.transition_direction > 0 and effect.frame >= effect.length:
+                    effect.frame = effect.length
+                    self._end_effect(name, state["callback"])
+                elif self.transition_direction < 0 and effect.frame <= 0:
+                    effect.frame = 0
+                    self._end_effect(name, state["callback"])
 
-          def handle_menu_to_game_transition(self):
-                    if self.game.playing_transition and self.game.in_menu:
-                              if self.transition_effect.draw():
-                                        self.game.in_menu = False
+            elif name in ["you_died", "you_won"]:
+                effect.alpha = min(max(elapsed / state["duration"], 0), 1) * 255
 
-          def handle_game_start_transition(self):
-                    if not self.game.in_menu and self.game.game_time < 1:
-                              self.transition_effect.draw()
+            elif name == "blood":
+                if elapsed < BLOOD["blood_effect_duration"]:
+                    effect.frame += 1
+                    if effect.frame > effect.length:
+                        effect.frame = effect.length
+                else:
+                    effect.frame -= 1
+                    if effect.frame < 0:
+                        del self.active_effects[name]
 
-          def handle_in_game_transition(self):
-                    if not self.game.in_menu and self.game.game_time >= 1 and self.game.playing_transition:
-                              if not self.inverted_transition:
-                                        self.transition_effect.frame = self.transition_effect.length
-                                        self.inverted_transition = True
-                              self.transition_effect.draw(-1)
-                              if self.transition_effect.frame < 0:
-                                        self.game.playing_transition = False
+    def _end_effect(self, effect_name: str, callback: Optional[Callable]):
+        """End an effect and execute its callback if provided."""
+        if callback:
+            callback()
+        if effect_name in self.active_effects:
+            del self.active_effects[effect_name]
 
-          def handle_you_won_effect(self):
-                    if self.game.won:
-                              if self.youwon_start_time is None:
-                                        self.youwon_start_time = self.game.game_time
-                                        pygame.mixer.music.stop()
-                                        if self.game.difficulty == "easy":
-                                                  self.game.wins += 1
-                                        elif self.game.difficulty == "medium":
-                                                  self.game.wins += 2
-                                        elif self.game.difficulty == "hard":
-                                                  self.game.wins += 3
-                                        self.game.soundM.play_sound("youwon_sound", VOLUMES["youwon_frequancy"], VOLUMES["youwon_volume"] * self.game.master_volume)
-                              elapsed_time = self.game.game_time - self.youwon_start_time
-                              self.youwon_effect.alpha = min(max(elapsed_time / self.youwon_duration, 0), 1) * 255
-                              self.youwon_effect.draw()
+    def draw(self):
+        """Draw all active effects and update their states."""
+        self.game.uiM.draw_xp_bar()  # Draw XP bar under effects
+        self.update()
 
-          def handle_you_died_effect(self):
-                    if self.game.died:
-                              if self.youdied_start_time is None:
-                                        self.youdied_start_time = self.game.game_time
-                                        pygame.mixer.music.stop()
-                                        self.game.soundM.play_sound("youdied_sound", VOLUMES["youdied_frequancy"], VOLUMES["youdied_volume"] * self.game.master_volume)
-                              elapsed_time = self.game.game_time - self.youdied_start_time
-                              self.youdied_effect.alpha = min(max(elapsed_time / self.youdied_duration, 0), 1) * 255
-                              self.youdied_effect.draw()
+        for name, state in self.active_effects.items():
+            effect = self.effects[name]
+            if name == "transition":
+                effect.draw(speed=1 if self.transition_direction > 0 else -1)
+            else:
+                effect.draw()
 
-          def handle_restart_transition(self):
-                    if self.draw_restart_transition:
-                              self.transition_effect.frame = 0
-                              self.drawing_restart_transition = True
-                              self.draw_restart_transition = False
-                    if self.drawing_restart_transition:
-                              self.transition_effect.draw()
-                              if self.transition_effect.frame > self.transition_effect.length + 3:
-                                        self.game.restart = True
+        # Draw blood effect when dead, outside of active effects for layering
+        if self.game.died and not self.game.won and "blood" not in self.active_effects:
+            self.effects["blood"].frame = self.effects["blood"].length
+            self.effects["blood"].draw()
 
-          def draw_blood_effect(self):
-                    if self.has_blood_effect and not self.game.died and not self.game.won:
-                              elapsed_time = self.game.game_time - self.blood_effect_start_time
-                              if elapsed_time < BLOOD["blood_effect_duration"]:
-                                        self.blood_effect.draw()
-                                        if self.blood_effect.frame > self.blood_effect.length:
-                                                  self.blood_effect.frame = self.blood_effect.length
-                              elif elapsed_time > BLOOD["blood_effect_duration"]:
-                                        self.blood_effect.draw(-1)
-                                        if self.blood_effect.frame < 0:
-                                                  self.has_blood_effect = False
+    ### Public Trigger Methods ###
+    def trigger_transition(self, reverse: bool = False, callback: Optional[Callable] = None):
+        """Trigger a transition effect with optional reverse direction."""
+        self.transition_direction = -1 if reverse else 1
+        self.start_effect("transition", callback=callback)
 
-          def draw_blood_when_dead(self):
-                    if self.game.died and not self.game.won:
-                              self.blood_effect.frame = self.blood_effect.length
-                              self.blood_effect.draw()
+    def trigger_you_died(self, duration: float = 3):
+        """Trigger the 'You Died' effect."""
+        if "you_died" not in self.active_effects:
+            self.start_effect("you_died", duration=duration)
+
+    def trigger_you_won(self, duration: float = 3):
+        """Trigger the 'You Won' effect with difficulty-based win increments."""
+        if "you_won" not in self.active_effects:
+            self.start_effect("you_won", duration=duration, callback=self._on_you_won_complete)
+
+    def trigger_blood_effect(self):
+        """Trigger the blood effect."""
+        if "blood" not in self.active_effects:
+            self.start_effect("blood", duration=BLOOD["blood_effect_duration"])
+
+    def _on_you_won_complete(self):
+        """Handle logic when 'You Won' effect completes."""
+        if self.game.difficulty == "easy":
+            self.game.wins += 1
+        elif self.game.difficulty == "medium":
+            self.game.wins += 2
+        elif self.game.difficulty == "hard":
+            self.game.wins += 3
+
+    ### Game State Integration ###
+    def handle_game_state(self):
+        """Handle effects based on current game state."""
+        if self.game.died and not self.game.won:
+            self.trigger_you_died()
+        elif self.game.won:
+            self.trigger_you_won()
+        if self.game.playing_transition:
+            self.trigger_transition(reverse=self.game.in_menu, callback=self._on_transition_complete)
+
+    def _on_transition_complete(self):
+        """Handle transition completion logic."""
+        if self.game.in_menu:
+            self.game.in_menu = False
+        self.game.playing_transition = False
