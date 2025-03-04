@@ -24,7 +24,6 @@ from copy import deepcopy  # For creating deep copies of objects
 from itertools import product  # For creating cartesian products of iterables
 from pstats import Stats  # For profiling statistics
 
-
 # Local imports
 from Code.Shaders import Shader  # Custom shader module
 from Code.Variables.LoadAssets import *  # Asset loading module

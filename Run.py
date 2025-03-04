@@ -22,5 +22,3 @@ if __name__ == "__main__":
                               profiler.disable()
                               stats = Stats(profiler)
                               stats.sort_stats('time').reverse_order().print_stats()
-
-sys.exit(1)
