@@ -17,9 +17,10 @@ class Methods:
                        "line_thickness": 2, "line_colour": (131, 64, 44), "on": False, "active": False,
                        "current_hover_offset": 0,
                        },
-            "card": {"res": (44, 67), "axis": "y", "axisl": "min", "speed": 1500, "distance_factor": 0.3,
-                     "hover_slide": True, "hover_offset": 15, "hover_speed": 30,
-                     "active": False, "current_hover_offset": 0}}
+            "card": {"res": (54, 77), "axis": "y", "axisl": "min", "speed": 1500, "distance_factor": 0.3,
+                     "hover_slide": True, "hover_offset": 15, "hover_speed": 30, "text_pos": "top",
+                     "active": False, "current_hover_offset": 0, "base_colour": (255, 255, 255),
+                     "hovering_colour": (131, 64, 44)}}
         self.enemy_config = {"stopping_range": 25 ** 2, "steering_strength": 0.4, "friction": 0.2,
                              "animation_speed": 15, "hit_cooldown": 0, "separation_radius": 8,
                              "separation_strength": 4, "attack_cooldown": 0.4, "knockback": 1, "hit_effect": (20, 200),

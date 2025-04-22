@@ -20,6 +20,7 @@ class CardManager:
         # Update each card's state
         for card in self.cards:
             card.update()
+            card.change_colour()
             # Set card active state based on the game's card toggle
             card.active = self.game.cards_on
             # Check for user input and timer update to apply card effects

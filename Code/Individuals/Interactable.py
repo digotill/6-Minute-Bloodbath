@@ -307,28 +307,52 @@ class Cards(Interactable):
 
         # Set attributes for the card using the provided dictionary
         self.game.methods.set_attributes(self, dictionary)
+        self.text_timer = Timer(self.game.ticks, GENERAL["misc"][3])
 
         # Set the position and other initial properties
         self.pos = v2(pos)
         self.index = None
-        self.has_text = False
+        self.has_text = True
+
+        self.text_input = ""
 
         # Initialize the card's position
         self.init_positions()
         self.is_visible = False
 
+    def change_colour(self):
+        # Change the color of the button text based on hover state
+        if self.has_text and self.is_visible:
+            colour = self.hovering_colour if self.rect.collidepoint(
+                self.game.inputM.get("position")) else self.base_colour
+            self.text = self.font.render(self.text_input, False, colour)
+
     def reset(self, dictionary, index):
         # Reset the card's attributes and image based on the provided dictionary and index
         self.game.methods.set_attributes(self, dictionary)
         self.image = self.game.assets["cards"][index]
+        self.update_text()
+
+    def update_text(self):
+        if self.damage != 0:
+            self.text_input = str(self.damage) + "% damage"
+        elif self.health != 0:
+            self.text_input = str(int(self.health)) + " health"
+        elif self.pierce != 0:
+            self.text_input = str(int(self.pierce)) + " pierce"
+        elif self.attack_speed != 0:
+            self.text_input = str(self.attack_speed) + "% atk speed"
+        elif self.stamina != 0:
+            self.text_input = str(int(self.stamina)) + " stamina"
+        elif self.knockback != 0:
+            self.text_input = str(self.knockback) + "% knockback"
 
     def apply_effect(self):
         # Apply the card's effect based on its attributes
         if self.damage != 0:
             # Increase player damage and display upgrade message
-            ratio = int(self.damage / self.game.player.damage * 100)
-            self.game.player.damage += int(self.damage)
-            self.game.uiM.toggle_card_upgrade("+ " + str(ratio) + " % damage")
+            ratio = 1 + self.damage / 100
+            self.game.player.damage *= ratio
         elif self.health != 0:
             # Increase player health and display upgrade message
             if self.game.player.health + int(self.health) > self.game.player.max_health:
@@ -337,26 +361,17 @@ class Cards(Interactable):
             else:
                 self.game.player.health += int(self.health)
             self.game.player.health = min(self.game.player.health, self.game.player.max_health)
-            self.game.uiM.toggle_card_upgrade("+ " + str(int(self.health)) + " health")
         elif self.pierce != 0:
             # Increase bullet pierce and display upgrade message
             self.game.player.gun.pierce += int(self.pierce)
-            self.game.uiM.toggle_card_upgrade("+ " + str(int(self.pierce)) + " bullet pierce")
         elif self.attack_speed != 0:
             # Decrease attack speed and display upgrade message
-            ratio = int(self.attack_speed / self.game.player.gun.fire_rate * 100)
-            self.game.player.gun.fire_rate -= self.attack_speed
-            self.game.uiM.toggle_card_upgrade("- " + str(ratio) + " % attack speed")
+            ratio = 1 - self.attack_speed / 100
+            self.game.player.gun.fire_rate *= ratio
         elif self.stamina != 0:
             # Increase player stamina and display upgrade message
             self.game.player.max_stamina += int(self.stamina)
-            self.game.uiM.toggle_card_upgrade("+ " + str(int(self.stamina)) + " stamina")
-        elif self.shots != 0:
-            # Increase shots fired and display upgrade message
-            self.game.player.gun.pierce += int(self.shots)
-            self.game.uiM.toggle_card_upgrade("+ " + str(int(self.shots)) + " shots fired")
         elif self.knockback != 0:
             # Increase knockback and display upgrade message
-            ratio = int(self.knockback / self.game.player.gun.knockback * 100)
-            self.game.player.gun.knockback += int(self.knockback)
-            self.game.uiM.toggle_card_upgrade("+ " + str(ratio) + " % knockback")
+            ratio = 1 + self.knockback / 100
+            self.game.player.gun.knockback *= self.knockback

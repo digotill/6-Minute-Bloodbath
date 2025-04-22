@@ -182,8 +182,7 @@ BUTTONS = {  # Button settings for various game states
                                        {"text_pos": "top", "active": True, "hover_slide": False,
                                         "res": AM.assets["empty_bar_outline"].size, "axisl": "min"})}}
 
-ENEMIES = {
-    # Enemy settings           name,       res,      health, vel, damage, attack_range, armour, xp_chances, has_shadow
+ENEMIES = { # Enemy settings           name,       res,      health, vel, damage, attack_range, armour, xp_chances, has_shadow
     "canine_grey": M.create_enemy("canine_grey", (48, 32), 200, 140, 20, 50, 1, {"blue": 0.95, "orange": 1}, True, 48),
     "canine_white": M.create_enemy("canine_white", (48, 32), 300, 150, 25, 50, 1, {"blue": 0.95, "orange": 1}, True,
                                    48),
@@ -205,11 +204,11 @@ ENEMIES = {
     "brain": M.create_enemy("brain", (80, 64), 30000, 200, 100, 50, 2, {"light_blue": 1}, True, 48, {"knockback": 1.2})}
 
 CARDS = {  # Card settings
-    6: ["damage", 6], 13: ["health", 10], 20: ["pierce", 1], 25: ["attack_speed", 0.004], 29: ["spread", 1],
-    33: ["stamina", 6], 41: ["knockback", 4],  # common
-    45: ["damage", 10], 55: ["health", 20], 59: ["pierce", 2], 67: ["attack_speed", 0.008], 74: ["spread", 2],
+    6: ["damage", 3], 13: ["health", 10], 20: ["pierce", 1], 29: ["attack_speed", 2],
+    33: ["stamina", 6], 41: ["knockback", 3],  # common
+    45: ["damage", 5], 55: ["health", 20], 59: ["pierce", 2], 74: ["attack_speed", 4],
     83: ["stamina", 10], 90: ["knockback", 6],  # rare
-    97: ["damage", 13], 106: ["health", 30], 111: ["pierce", 3], 120: ["attack_speed", 0.01], 127: ["spread", 2],
-    134: ["stamina", 13], 140: ["knockback", 7],  # epic
-    144: ["damage", 20], 148: ["health", 50], 152: ["pierce", 4], 156: ["attack_speed", 0.015], 160: ["spread", 3],
-    163: ["stamina", 20], 165: ["knockback", 10]}  # legendary
+    97: ["damage",9], 106: ["health", 30], 111: ["pierce", 3], 127: ["attack_speed", 6],
+    134: ["stamina", 13], 140: ["knockback", 9],  # epic
+    144: ["damage", 12], 148: ["health", 50], 152: ["pierce", 4], 160: ["attack_speed", 8],
+    163: ["stamina", 20], 165: ["knockback", 12]}  # legendary
